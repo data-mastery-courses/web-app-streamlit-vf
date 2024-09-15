@@ -48,8 +48,8 @@ def load_data():
     on
         revs.restaurant_id = rests.restaurant_id
     where
-        datetime >= '2022-01-01'
-        and datetime < '2023-02-01'
+        datetime >= '2023-01-01'
+        and datetime < '2024-01-01'
         and location_city in ('Groningen', 'Amsterdam', 'Rotterdam')
     group by
         DATE(datetime),
@@ -101,7 +101,7 @@ min_date, max_date = st.slider(
     min_value=min_date_df,
     max_value=max_date_df,
     label="Select dates",
-    value=(date(2022, 1, 1), date(2022, 12, 31)),
+    value=(date(2023, 1, 1), date(2023, 12, 31)),
 )
 
 # fiter df_reviews on min_date and max_date
