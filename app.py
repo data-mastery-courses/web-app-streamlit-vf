@@ -1,10 +1,3 @@
-# How to run this web app:
-# open the shell in the Deliverable repo
-# `streamlit run team_projects/example_member/web_app/app.py`
-#
-# Source: https://github.com/data-mastery-courses/web-app-streamlit-vf
-
-# %%
 import os
 from datetime import date
 
@@ -21,10 +14,8 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_HOSTNAME = os.getenv("DB_HOSTNAME")
 DB_NAME = os.getenv("DB_NAME")
 
-# %%
-
 st.title("Deliverable - Customer Insights App")
-st.markdown("This app explores Deliverable review data and CBS demographical data.")
+st.write("This app explores Deliverable review data.")
 
 
 @st.cache_data
@@ -60,10 +51,23 @@ def load_data():
     return df_reviews_avr
 
 
-def min_max_dates(df_reviews):
-    min_date_df = df_reviews.review_date.min()
-    max_date_df = df_reviews.review_date.max()
-    return min_date_df, max_date_df
+# Load data
+df_reviews = load_data()
+
+min_date, max_date = st.slider(
+    min_value=df_reviews.review_date.min(),
+    max_value=df_reviews.review_date.max(),
+    label="Select dates",
+    value=(date(2023, 1, 1), date(2023, 12, 31)),
+)
+
+# fiter df_reviews on min_date and max_date
+df_reviews_filter = df_reviews.loc[
+    ((df_reviews.review_date >= min_date) & (df_reviews.review_date <= max_date))
+]
+df_reviews_filter = df_reviews_filter.sort_values(by="review_date")
+
+st.write("### Average reviews in main cities")
 
 
 def plot_avr_reviews(df_reviews):
@@ -86,37 +90,10 @@ def plot_avr_reviews(df_reviews):
     return chart
 
 
-def plot_reviews_over_time(df):
-    chart = px.line(df_reviews_filter, x="review_date", y="avg_del_score", color="location_city")
-    return chart
-
-
-# Load data
-df_reviews = load_data()
-
-# %%
-min_date_df, max_date_df = min_max_dates(df_reviews)
-
-min_date, max_date = st.slider(
-    min_value=min_date_df,
-    max_value=max_date_df,
-    label="Select dates",
-    value=(date(2023, 1, 1), date(2023, 12, 31)),
-)
-
-# fiter df_reviews on min_date and max_date
-df_reviews_filter = df_reviews.loc[
-    ((df_reviews.review_date >= min_date) & (df_reviews.review_date <= max_date))
-]
-df_reviews_filter = df_reviews_filter.sort_values(by="review_date")
-
-# %%
-st.write("### Average reviews in main cities")
-
 chart = plot_avr_reviews(df_reviews_filter)
 st.plotly_chart(chart)
 
 st.write("### Reviews over time")
 
-chart_time = plot_reviews_over_time(df_reviews_filter)
+chart_time = px.line(df_reviews_filter, x="review_date", y="avg_del_score", color="location_city")
 st.plotly_chart(chart_time)
